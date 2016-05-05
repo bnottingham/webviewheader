@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">WebViewWithHeader-Example</string>
+    <string name="header_title">I\'m a Header!!!!!!</string>
+</resources>

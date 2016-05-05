@@ -1,0 +1,4 @@
+include ':example'
+
+include ':library_webviewheader'
+project(':library_webviewheader').projectDir = new File('library')

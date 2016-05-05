@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item type="id" name="web_view_header" />
+    <item type="id" name="web_view_header_header" />
+    <item type="id" name="web_view_header_scrollable" />
+    <item type="id" name="web_view_header_content_size_placeholder" />
+</resources>
