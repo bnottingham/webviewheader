@@ -11,7 +11,7 @@ import android.webkit.WebSettings;
 import com.github.bnottingham.webviewheader.R;
 import com.github.bnottingham.webviewheader.webkit.WebViewHeaderChromeClient;
 import com.github.bnottingham.webviewheader.webkit.WebViewHeaderClient;
-import com.github.bnottingham.webviewheader.widget.WebViewHeader;
+import com.github.bnottingham.webviewheader.widget.HeaderWebView;
 
 /**
  * @author Brett Nottingham on 8/14/15
@@ -21,7 +21,7 @@ import com.github.bnottingham.webviewheader.widget.WebViewHeader;
  */
 public class WebViewHeaderPageFragment extends Fragment {
     private View mView;
-    private WebViewHeader mWebView;
+    private HeaderWebView mWebView;
     private String mUrl;
 
     public void setUrl(String url) {
@@ -37,7 +37,7 @@ public class WebViewHeaderPageFragment extends Fragment {
     }
 
     private void init() {
-        mWebView = (WebViewHeader) mView.findViewById(R.id.web_view_header);
+        mWebView = (HeaderWebView) mView.findViewById(R.id.web_view_header);
         setWebSettings();
 
         mWebView.setWebChromeClient(new WebViewHeaderChromeClient());

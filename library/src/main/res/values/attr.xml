@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="WebViewHeader">
+    <declare-styleable name="HeaderWebView">
         <attr name="webViewHeaderHeight" format="reference" />
     </declare-styleable>
 </resources>

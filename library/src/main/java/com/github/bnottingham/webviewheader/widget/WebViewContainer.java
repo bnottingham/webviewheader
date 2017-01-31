@@ -16,29 +16,43 @@ import com.github.bnottingham.webviewheader.R;
  *         <p/>
  *         FrameLayout parent of the WebViewHeader layout to initialize the UI, dispatch touch events, and handle configuration changes (landscape/portrait mode)
  */
-public class WebViewHeaderContainer extends FrameLayout {
+public class WebViewContainer extends FrameLayout {
     private LinearLayout mWebViewScrollable;
-    private WebViewHeader mWebView;
+    private HeaderWebView mWebView;
     private View mWebViewHeaderSizePlaceholder;
     private int mHeaderHeight;
 
-    public WebViewHeaderContainer(Context context) {
+    public WebViewContainer(Context context) {
         super(context);
     }
 
-    public WebViewHeaderContainer(Context context, AttributeSet attrs) {
+    public WebViewContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(context, attrs);
     }
 
-    public WebViewHeaderContainer(Context context, AttributeSet attrs, int defStyleAtts) {
+    public WebViewContainer(Context context, AttributeSet attrs, int defStyleAtts) {
         super(context, attrs, defStyleAtts);
         init(context, attrs);
     }
 
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        return true;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        return mWebView.dispatchTouchEvent(event);
+    }
+
+    public void onWebViewAttachedToWindow() {
+        initUI();
+    }
+
     private void init(Context context, AttributeSet attrs) {
-        final TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.WebViewHeader);
-        mHeaderHeight = (int) typedArray.getDimension(R.styleable.WebViewHeader_webViewHeaderHeight, 0);
+        final TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.HeaderWebView);
+        mHeaderHeight = (int) typedArray.getDimension(R.styleable.HeaderWebView_webViewHeaderHeight, 0);
         typedArray.recycle();
     }
 
@@ -50,7 +64,7 @@ public class WebViewHeaderContainer extends FrameLayout {
         // Initialize the WebView if necessary
         if (mWebView == null) {
             // Create the WebView
-            mWebView = (WebViewHeader) findViewById(R.id.web_view_header);
+            mWebView = (HeaderWebView) findViewById(R.id.web_view_header);
             mWebView.setHeaderHeight(mHeaderHeight);
             mWebView.setScrollableLayout(mWebViewScrollable);
 
@@ -81,21 +95,5 @@ public class WebViewHeaderContainer extends FrameLayout {
         LinearLayout.LayoutParams webViewLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         webViewLayoutParams.height = mWebViewHeaderSizePlaceholder.getMeasuredHeight();
         mWebView.setLayoutParams(webViewLayoutParams);
-    }
-
-    @Override
-    public void onFinishInflate() {
-        super.onFinishInflate();
-        initUI();
-    }
-
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        return true;
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        return mWebView.dispatchTouchEvent(event);
     }
 }

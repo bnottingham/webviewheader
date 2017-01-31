@@ -13,6 +13,7 @@ import com.github.bnottingham.webviewheader.R;
 import com.github.bnottingham.webviewheader.delegate.WebViewHeaderDelegate;
 import com.github.bnottingham.webviewheader.interfaces.OnScrollChangedEventListener;
 import com.github.bnottingham.webviewheader.interfaces.WebViewHeaderCoreInterface;
+import com.github.bnottingham.webviewheader.util.ViewUtil;
 import com.github.bnottingham.webviewheader.webkit.WebViewHeaderChromeClient;
 import com.github.bnottingham.webviewheader.webkit.WebViewHeaderClient;
 
@@ -22,7 +23,7 @@ import com.github.bnottingham.webviewheader.webkit.WebViewHeaderClient;
  *         <p/>
  *         Base WebView widget that handles sending the delegate all the required events to handle the header scroll
  */
-public class WebViewHeader extends WebView
+public class HeaderWebView extends WebView
         implements WebViewHeaderCoreInterface {
     private WebViewHeaderDelegate mWebViewHeaderDelegate;
     private WebViewHeaderClient mWebViewHeaderClient;
@@ -31,25 +32,33 @@ public class WebViewHeader extends WebView
     private LinearLayout mScrollableLayout;
     private int mHeaderHeight;
 
-    public WebViewHeader(final Context context) {
+    public HeaderWebView(final Context context) {
         super(context);
         init(null);
     }
 
-    public WebViewHeader(final Context context, final AttributeSet attrs) {
+    public HeaderWebView(final Context context, final AttributeSet attrs) {
         super(context, attrs);
         init(attrs);
     }
 
-    public WebViewHeader(final Context context, final AttributeSet attrs, final int defStyle) {
+    public HeaderWebView(final Context context, final AttributeSet attrs, final int defStyle) {
         super(context, attrs, defStyle);
         init(attrs);
     }
 
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+
+        WebViewContainer container = ViewUtil.unwrapContainerView(this);
+        container.onWebViewAttachedToWindow();
+    }
+
     private void init(final AttributeSet attrs) {
         //Get any attributes
-        final TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.WebViewHeader);
-        mHeaderHeight = (int) typedArray.getDimension(R.styleable.WebViewHeader_webViewHeaderHeight, 0);
+        final TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.HeaderWebView);
+        mHeaderHeight = (int) typedArray.getDimension(R.styleable.HeaderWebView_webViewHeaderHeight, 0);
         typedArray.recycle();
 
         //Set up the delegate
