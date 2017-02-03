@@ -1,6 +1,6 @@
 package com.github.bnottingham.webviewheader.interfaces;
 
-import android.widget.LinearLayout;
+import android.view.View;
 
 /**
  * @author Brett Nottingham on 8/14/15
@@ -14,7 +14,7 @@ public interface WebViewHeaderCoreInterface extends WebViewContentInterface {
      *
      * @param view to set
      */
-    void setScrollableLayout(final LinearLayout view);
+    void setScrollableLayout(final View view);
 
     /**
      * Set the height of header

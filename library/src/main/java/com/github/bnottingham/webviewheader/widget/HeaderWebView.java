@@ -1,191 +1,131 @@
 package com.github.bnottingham.webviewheader.widget;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import android.webkit.WebChromeClient;
+import android.view.View;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import com.github.bnottingham.webviewheader.R;
-import com.github.bnottingham.webviewheader.delegate.WebViewHeaderDelegate;
 import com.github.bnottingham.webviewheader.interfaces.OnScrollChangedEventListener;
-import com.github.bnottingham.webviewheader.interfaces.WebViewHeaderCoreInterface;
+import com.github.bnottingham.webviewheader.interfaces.impl.OnLayoutHeightChangedListener;
 import com.github.bnottingham.webviewheader.util.ViewUtil;
-import com.github.bnottingham.webviewheader.webkit.WebViewHeaderChromeClient;
-import com.github.bnottingham.webviewheader.webkit.WebViewHeaderClient;
 
 /**
- * @author Brett Nottingham on 8/14/15
+ * @author Brett Nottingham on 2/1/16
  *         Copyright (c) 2015 Nottingham, Inc. All rights reserved.
  *         <p/>
- *         Base WebView widget that handles sending the delegate all the required events to handle the header scroll
+ *         Container that holds a custom WebView and a Header Placeholder
  */
-public class HeaderWebView extends WebView
-        implements WebViewHeaderCoreInterface {
-    private WebViewHeaderDelegate mWebViewHeaderDelegate;
-    private WebViewHeaderClient mWebViewHeaderClient;
-    private WebViewHeaderChromeClient mWebViewHeaderChromeClient;
-    private OnScrollChangedEventListener mScrollChangedEventListener = OnScrollChangedEventListener.NO_OP;
-    private LinearLayout mScrollableLayout;
+public class HeaderWebView extends FrameLayout {
+    private View mWebViewContainer;
+    private CustomWebView mWebView;
+    private View mWebViewHeaderPlaceholder;
+    private OnScrollChangedEventListener mOnScrollChangedEventListener = OnScrollChangedEventListener.NO_OP;
+
     private int mHeaderHeight;
 
     public HeaderWebView(final Context context) {
         super(context);
-        init(null);
+        init(context, null);
     }
 
     public HeaderWebView(final Context context, final AttributeSet attrs) {
         super(context, attrs);
-        init(attrs);
+        init(context, attrs);
     }
 
     public HeaderWebView(final Context context, final AttributeSet attrs, final int defStyle) {
         super(context, attrs, defStyle);
-        init(attrs);
+        init(context, attrs);
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public HeaderWebView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+        init(context, attrs);
+    }
+
+    public void setHeaderContentView(final View view) {
+        mWebView.setScrollEventListener(new OnScrollChangedEventListener() {
+            @Override
+            public void onScrollChangedEvent(int x, int y, int oldX, int oldY) {
+                view.setTranslationY(-y);
+            }
+        });
+    }
+
+    public void setScrollEventListener(OnScrollChangedEventListener listener) {
+        mOnScrollChangedEventListener = listener == null ? OnScrollChangedEventListener.NO_OP : listener;
+    }
+
+    public WebView getWebView() {
+        return mWebView;
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        return mHeaderHeight > 0;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        return mWebView.dispatchTouchEvent(event);
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+
+        mWebViewContainer = findViewById(R.id.web_view_container);
+        mWebViewHeaderPlaceholder = findViewById(R.id.web_view_header_placeholder);
+        mWebView = (CustomWebView) findViewById(R.id.web_view);
+
+        mWebView.setScrollableLayout(mWebViewContainer);
+
+        addOnLayoutChangeListener(new OnLayoutHeightChangedListener() {
+            @Override
+            public void onLayoutHeightChanged(int prevHeight, int newHeight) {
+                updateLayoutHeight();
+            }
+        });
+
+        updateHeader();
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-
-        WebViewContainer container = ViewUtil.unwrapContainerView(this);
-        container.onWebViewAttachedToWindow();
+        ViewUtil.unwrapContainerView(this).onWebViewAttachedToWindow();
     }
 
-    private void init(final AttributeSet attrs) {
-        //Get any attributes
-        final TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.HeaderWebView);
+    private void init(final Context context, final AttributeSet attrs) {
+        inflate(context, R.layout.layout_webview, this);
+
+        final TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.HeaderWebView);
         mHeaderHeight = (int) typedArray.getDimension(R.styleable.HeaderWebView_webViewHeaderHeight, 0);
         typedArray.recycle();
 
-        //Set up the delegate
-        mWebViewHeaderDelegate = new WebViewHeaderDelegate(getContext(), this, mHeaderHeight);
-        mWebViewHeaderDelegate.setScrollableLayout(mScrollableLayout);
-
-        //Set default clients
-        setWebViewClient(new WebViewHeaderClient());
-        setWebChromeClient(new WebViewHeaderChromeClient());
+        setId(R.id.header_web_view);
     }
 
-    @Override
-    public void setScrollableLayout(final LinearLayout scrollableLayout) {
-        mScrollableLayout = scrollableLayout;
-        if (mWebViewHeaderDelegate != null) {
-            mWebViewHeaderDelegate.setScrollableLayout(scrollableLayout);
-        }
+    private void updateHeader() {
+        mWebView.setHeaderHeight(mHeaderHeight);
+        mWebViewHeaderPlaceholder.getLayoutParams().height = mHeaderHeight;
     }
 
-    @Override
-    public void setHeaderHeight(final int headerHeight) {
-        mHeaderHeight = headerHeight;
-        if (mWebViewHeaderDelegate != null) {
-            mWebViewHeaderDelegate.setHeaderHeight(headerHeight);
-        }
-    }
+    private void updateLayoutHeight() {
+        FrameLayout.LayoutParams scrollableLayoutParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT);
+        scrollableLayoutParams.height = getMeasuredHeight() + mHeaderHeight;
+        mWebViewContainer.setLayoutParams(scrollableLayoutParams);
 
-    @Override
-    public int getContentWidth() {
-        return computeHorizontalScrollRange();
-    }
-
-    @Override
-    public int getContentHeight() {
-        return super.getContentHeight();
-    }
-
-    @Override
-    public int getVerticalRangeOffset() {
-        return computeVerticalScrollRange();
-    }
-
-    @Override
-    public void onScrollChangedEvent(int x, int y, int oldX, int oldY) {
-        mScrollChangedEventListener.onScrollChangedEvent(x, y, oldX, oldY);
-    }
-
-    @Override
-    public void onSingleTap() {
-    }
-
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent event) {
-        if (mHeaderHeight == 0) {
-            return super.dispatchTouchEvent(event);
-        } else {
-            return mWebViewHeaderDelegate.onTouchEvent(event);
-        }
-    }
-
-    @Override
-    protected void onScrollChanged(int x, int y, int oldX, int oldY) {
-        super.onScrollChanged(x, y, oldX, oldY);
-        if (mHeaderHeight == 0) {
-            onScrollChangedEvent(x, y, oldX, oldY);
-        } else {
-            mWebViewHeaderDelegate.onScrollEvent(x, y, oldX, oldY);
-        }
-    }
-
-    @Override
-    public void setScrollY(final int value) {
-        if (mHeaderHeight == 0) {
-            super.setScrollY(value);
-        } else {
-            mWebViewHeaderDelegate.setScrollY(value);
-        }
-    }
-
-    @Override
-    public int getHeaderScrollY() {
-        if (mHeaderHeight == 0) {
-            return super.getScrollY();
-        } else {
-            return mWebViewHeaderDelegate.getScrollY();
-        }
-    }
-
-    @Override
-    public void setScrollEventListener(OnScrollChangedEventListener listener) {
-        mScrollChangedEventListener = listener;
-        if (mScrollChangedEventListener == null) {
-            mScrollChangedEventListener = OnScrollChangedEventListener.NO_OP;
-        }
-    }
-
-    @Override
-    public void setWebViewClient(WebViewClient client) {
-        super.setWebViewClient(client);
-        try {
-            mWebViewHeaderClient = (WebViewHeaderClient) client;
-            mWebViewHeaderClient.setWebViewClientListener(new WebViewHeaderClient.WebViewClientListener() {
-                @Override
-                public void onScaleChanged(WebView view, float oldScale, float newScale) {
-                    if (mWebViewHeaderDelegate != null) {
-                        mWebViewHeaderDelegate.onScaleChangedEvent(oldScale, newScale);
-                    }
-                }
-            });
-        } catch (ClassCastException e) {
-            throw new ClassCastException(client.toString() + " must extend WebViewHeaderClient");
-        }
-    }
-
-    @Override
-    public void setWebChromeClient(WebChromeClient client) {
-        super.setWebChromeClient(client);
-        try {
-            mWebViewHeaderChromeClient = (WebViewHeaderChromeClient) client;
-            mWebViewHeaderChromeClient.setWebViewClientListener(new WebViewHeaderChromeClient.ChromeClientListener() {
-                @Override
-                public void onProgressChanged(WebView view, int newProgress) {
-
-                }
-            });
-        } catch (ClassCastException e) {
-            throw new ClassCastException(client.toString() + " must extend WebViewHeaderChromeClient");
-        }
+        LinearLayout.LayoutParams webViewLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        webViewLayoutParams.height = getMeasuredHeight();
+        mWebView.setLayoutParams(webViewLayoutParams);
     }
 }

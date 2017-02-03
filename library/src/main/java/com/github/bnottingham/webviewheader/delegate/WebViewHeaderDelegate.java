@@ -4,9 +4,9 @@ import android.content.Context;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
+import android.view.View;
 import android.view.ViewConfiguration;
 import android.webkit.WebView;
-import android.widget.LinearLayout;
 
 import com.github.bnottingham.webviewheader.interfaces.WebViewContentInterface;
 import com.github.bnottingham.webviewheader.interfaces.impl.BaseGestureListener;
@@ -22,7 +22,7 @@ import com.github.bnottingham.webviewheader.util.WebViewUtil;
 public class WebViewHeaderDelegate {
     //Basic Constructor Values
     private Context mContext;
-    private LinearLayout mScrollableLayout;
+    private View mScrollableLayout;
     private WebView mWebView;
     private WebViewContentInterface mWebViewContentInterface;
 
@@ -69,7 +69,7 @@ public class WebViewHeaderDelegate {
         mTouchSlopSquare *= mTouchSlopSquare;
     }
 
-    public void setScrollableLayout(LinearLayout scrollableLayout) {
+    public void setScrollableLayout(View scrollableLayout) {
         mScrollableLayout = scrollableLayout;
     }
 

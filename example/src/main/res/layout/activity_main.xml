@@ -1,27 +1,35 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".activity.MainActivity">
 
-    <FrameLayout
-        android:id="@+id/header"
+    <com.github.bnottingham.webviewheader.widget.ContentContainer
         android:layout_width="match_parent"
-        android:layout_height="@dimen/header_height_full"
-        android:background="#123456">
+        android:layout_height="match_parent">
 
-        <TextView
+        <com.github.bnottingham.webviewheader.widget.HeaderWebView
+            android:id="@id/header_web_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:text="@string/header_title"
-            android:textColor="@android:color/white"
-            android:textSize="20sp" />
-    </FrameLayout>
+            app:webViewHeaderHeight="@dimen/header_height" />
 
-    <include
-        layout="@layout/layout_webviewheader"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        <FrameLayout
+            android:id="@id/header_container"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/header_height"
+            android:background="#123456">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:text="@string/header_title"
+                android:textColor="@android:color/white"
+                android:textSize="20sp" />
+        </FrameLayout>
+
+    </com.github.bnottingham.webviewheader.widget.ContentContainer>
 </FrameLayout>

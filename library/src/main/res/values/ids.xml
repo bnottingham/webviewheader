@@ -1,7 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item type="id" name="web_view_header" />
-    <item type="id" name="web_view_header_header" />
-    <item type="id" name="web_view_header_scrollable" />
-    <item type="id" name="web_view_header_content_size_placeholder" />
+
+    <!-- View that contains the actual header content -->
+    <item name="header_container" type="id" />
+
+    <!-- FrameLayout that contains the web_view_container (HeaderWebView) -->
+    <item name="header_web_view" type="id" />
+
+    <!-- LinearLayout that contains the web_view_header_placeholder and the web_view_container -->
+    <item name="web_view_container" type="id" />
+
+    <!-- Placed above the CustomWebView (in a LinearLayout) as a blank header -->
+    <item name="web_view_header_placeholder" type="id" />
+
+    <!-- The instance of the CustomWebView which is an instance of WebView-->
+    <item name="web_view" type="id" />
 </resources>
